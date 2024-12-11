@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: kafka-web
+  kafka:
+#    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+#    consumer:
+#      group-id: notifications-group
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  r2dbc:
+    #    url: r2dbc:postgresql://localhost:5432/notifications
+    url: ${SPRING_R2DBC_URL}
+    #    username: postgres
+    username: ${SPRING_R2DBC_USERNAME}
+    #    password: password
+    password: ${SPRING_R2DBC_PASSWORD}
+
+  datasource:
+#    url: jdbc:postgresql://localhost:5432/notifications
+    url: ${SPRING_DATASOURCE_URL}
+#    username: postgres
+    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: password
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    locations: classpath:db/migration

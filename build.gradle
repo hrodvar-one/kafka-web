@@ -35,8 +35,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.springframework.kafka:spring-kafka'
 
-    //  Реактивный драйвер работы с Postgresql
-//    implementation 'org.postgresql:r2dbc-postgresql:1.0.7.RELEASE'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.1'
 
     compileOnly 'org.projectlombok:lombok'
 

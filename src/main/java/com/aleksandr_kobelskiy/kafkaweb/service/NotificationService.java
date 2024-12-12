@@ -1,6 +1,7 @@
 package com.aleksandr_kobelskiy.kafkaweb.service;
 
-import com.aleksandr_kobelskiy.kafkaweb.model.Notification;
+import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationEntity;
+import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationStatus;
 import com.aleksandr_kobelskiy.kafkaweb.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -18,32 +19,33 @@ public class NotificationService {
     private final NotificationRepository repository;
 
     public void processMessage(String message) {
-        Notification notification = parseMessage(message);
-        repository.save(notification).subscribe();
+        NotificationEntity notificationEntity = parseMessage(message);
+        repository.save(notificationEntity).subscribe();
     }
 
-    public Flux<Notification> getAllNotifications(Pageable pageable) {
+    public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
         return repository.findAllBy(pageable);
     }
 
-    public Mono<Notification> getNotificationById(Long id) {
+    public Mono<NotificationEntity> getNotificationById(Long id) {
         return repository.findById(id);
     }
 
     public Mono<Void> updateNotificationStatus(Long id, String status) {
         return repository.findById(id)
-                .flatMap(notification -> {
-                    notification.setNotificationStatus(status);
-                    notification.setModifiedAt(LocalDateTime.now());
-                    return repository.save(notification);
+                .flatMap(notificationEntity -> {
+//                    notificationEntity.setNotificationStatus(status);
+                    notificationEntity.setNotificationStatus(NotificationStatus.valueOf(status));
+                    notificationEntity.setModifiedAt(LocalDateTime.now());
+                    return repository.save(notificationEntity);
                 })
                 .then();
     }
 
-    private Notification parseMessage(String message) {
+    private NotificationEntity parseMessage(String message) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(message, Notification.class);
+            return objectMapper.readValue(message, NotificationEntity.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse message: " + message, e);
         }

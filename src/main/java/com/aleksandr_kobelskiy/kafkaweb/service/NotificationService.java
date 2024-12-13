@@ -6,11 +6,14 @@ import com.aleksandr_kobelskiy.kafkaweb.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+
+import static org.apache.kafka.streams.kstream.EmitStrategy.log;
 
 @Service
 @RequiredArgsConstructor
@@ -18,13 +21,34 @@ public class NotificationService {
 
     private final NotificationRepository repository;
 
+//    public void processMessage(String message) {
+//        NotificationEntity notificationEntity = parseMessage(message);
+//        repository.save(notificationEntity).subscribe();
+//    }
+
     public void processMessage(String message) {
         NotificationEntity notificationEntity = parseMessage(message);
-        repository.save(notificationEntity).subscribe();
+
+        // Проверяем, заполнено ли поле expirationDate
+        if (notificationEntity.getExpirationDate() == null) {
+            // Устанавливаем значение по умолчанию, например, 7 дней с текущего времени
+            notificationEntity.setExpirationDate(LocalDateTime.now().plusDays(7));
+        }
+
+        repository.save(notificationEntity)
+                .doOnSuccess(entity -> log.info("Notification saved successfully: {}", entity))
+                .doOnError(error -> log.error("Error saving notification: {}", error.getMessage(), error))
+                .subscribe();
     }
 
+//    public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
+////        return repository.findAllBy(pageable);
+//        return repository.findAll((Sort) pageable);
+//    }
+
     public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
-        return repository.findAllBy(pageable);
+        Sort sort = pageable.getSortOr(Sort.unsorted());
+        return repository.findAll(sort); // Убедитесь, что репозиторий принимает Sort
     }
 
     public Mono<NotificationEntity> getNotificationById(Long id) {

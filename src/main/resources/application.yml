@@ -11,8 +11,6 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#      key-deserializer: org.apache.kafka.connect.json.JsonDeserializer
-#      value-deserializer: org.apache.kafka.connect.json.JsonDeserializer
   r2dbc:
 #        url: r2dbc:postgresql://localhost:5432/week1_db
 #        username: postgres
@@ -41,3 +39,6 @@ spring:
 #    password: password
 
     locations: classpath:db/migration
+
+server:
+  port: 8687

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -81,8 +82,8 @@ class NotificationServiceTest {
     void getNotificationById_failure() {
         when(repository.findById(1L)).thenReturn(Mono.empty());
 
-        Mono<NotificationEntity> result = service.getNotificationById(1L);
-        assertNull(result.block());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> service.getNotificationById(1L).block());
+        assertEquals("404 NOT_FOUND \"Notification not found\"", exception.getMessage());
     }
 
     @Test
@@ -102,7 +103,10 @@ class NotificationServiceTest {
     void updateNotificationStatus_failure() {
         when(repository.findById(1L)).thenReturn(Mono.empty());
 
-        assertDoesNotThrow(() -> service.updateNotificationStatus(1L, "COMPLETE").block()); // Явно вызываем block()
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.updateNotificationStatus(1L, "COMPLETE").block());
+
+        assertEquals("404 NOT_FOUND \"Notification not found\"", exception.getMessage());
         verify(repository, never()).save(any(NotificationEntity.class));
     }
 }

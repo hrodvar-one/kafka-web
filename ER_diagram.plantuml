@@ -1,0 +1,21 @@
+@startuml
+entity "notifications.notifications" as Notifications {
+    + id : serial [PK]
+    + created_at : timestamp <<default: now()>> [NOT NULL]
+    + modified_at : timestamp
+    + expiration_date : timestamp [NOT NULL]
+    + message : text [NOT NULL]
+    + message_type : text <<INTERNAL/EXTERNAL>>
+    + error : text
+    + user_uid : varchar(36)
+    + notification_status : varchar(32) <<NEW/COMPLETE>>
+    + trigger_code : varchar(128) <<USER_REGISTRATION_1/DELETE_USER_2>>
+    + object_type : varchar(255) <<USER/PAYMENT/MERCHANT>>
+    + object_id : varchar(36) <<UUID>>
+    + subject : varchar(128) <<PAYMENT SUCCESS/etc.>>
+    + created_by : varchar(255) <<SYSTEM/OPERATOR>>
+    + has_confirm_otp : boolean <<default: false>>
+    --
+    unique (object_id, notification_status, message_type, trigger_code)
+}
+@enduml

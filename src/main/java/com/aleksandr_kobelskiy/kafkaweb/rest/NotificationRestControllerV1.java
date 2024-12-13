@@ -4,6 +4,7 @@ import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationEntity;
 import com.aleksandr_kobelskiy.kafkaweb.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,6 +27,7 @@ public class NotificationRestControllerV1 {
     }
 
     @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
         return notificationService.updateNotificationStatus(id, status);
     }

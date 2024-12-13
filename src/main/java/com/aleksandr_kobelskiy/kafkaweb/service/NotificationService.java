@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,11 +22,6 @@ import static org.apache.kafka.streams.kstream.EmitStrategy.log;
 public class NotificationService {
 
     private final NotificationRepository repository;
-
-//    public void processMessage(String message) {
-//        NotificationEntity notificationEntity = parseMessage(message);
-//        repository.save(notificationEntity).subscribe();
-//    }
 
     public void processMessage(String message) {
         NotificationEntity notificationEntity = parseMessage(message);
@@ -41,29 +38,31 @@ public class NotificationService {
                 .subscribe();
     }
 
-//    public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
-////        return repository.findAllBy(pageable);
-//        return repository.findAll((Sort) pageable);
-//    }
-
     public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
         Sort sort = pageable.getSortOr(Sort.unsorted());
         return repository.findAll(sort); // Убедитесь, что репозиторий принимает Sort
     }
 
     public Mono<NotificationEntity> getNotificationById(Long id) {
-        return repository.findById(id);
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found")));
     }
 
     public Mono<Void> updateNotificationStatus(Long id, String status) {
-        return repository.findById(id)
-                .flatMap(notificationEntity -> {
-//                    notificationEntity.setNotificationStatus(status);
-                    notificationEntity.setNotificationStatus(NotificationStatus.valueOf(status));
-                    notificationEntity.setModifiedAt(LocalDateTime.now());
-                    return repository.save(notificationEntity);
-                })
-                .then();
+        try {
+            NotificationStatus notificationStatus = NotificationStatus.valueOf(status); // Проверка валидности статуса
+            return repository.findById(id)
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found")))
+                    .flatMap(notificationEntity -> {
+                        notificationEntity.setNotificationStatus(notificationStatus);
+                        notificationEntity.setModifiedAt(LocalDateTime.now());
+                        return repository.save(notificationEntity);
+                    })
+                    .then();
+        } catch (IllegalArgumentException e) {
+            // Исключение, если статус недопустим
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid notification status: " + status));
+        }
     }
 
     private NotificationEntity parseMessage(String message) {

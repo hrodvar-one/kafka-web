@@ -1,0 +1,67 @@
+@startuml UML_component_diagram
+skinparam componentStyle rectangle
+
+package "Docker Compose" {
+    "Docker APP"
+    "Docker POSTMAN"
+    "Docker KAFKA"
+}
+
+package "Docker APP" {
+    "Entity Layer"
+    "Repository Layer"
+    "DTO Layer"
+    "Service Layer"
+    "REST_Controller Layer"
+}
+
+package "Docker POSTMAN" {
+    "POSTMAN"
+}
+
+package "Docker KAFKA" {
+    "KAFKA"
+}
+
+package "Entity Layer" {
+  [NotificationEntity] <<entity>>
+}
+
+package "DTO Layer" {
+  [NotificationDTO] <<dto>>
+}
+
+package "POSTMAN" {
+  [Postman] <<view>>
+}
+
+package "KAFKA" {
+  [Kafka] <<message broker>>
+}
+
+package "REST_Controller Layer" {
+  [NotificationRestControllerV1] <<controller>>
+}
+
+package "Service Layer" {
+  [NotificationService] <<service>>
+  [KafkaConsumerService] <<service>>
+}
+
+package "Repository Layer" {
+  [NotificationRepository] <<repository>>
+}
+
+[Postman] --> [NotificationRestControllerV1]
+[Kafka] --> [KafkaConsumerService]
+
+[NotificationService] --> [NotificationRepository]
+[KafkaConsumerService] --> [NotificationService]
+
+[NotificationRestControllerV1] --> [NotificationService]
+[NotificationRestControllerV1] --> [NotificationDTO]
+[NotificationService] --> [NotificationDTO]
+[NotificationService] --> [NotificationEntity]
+[NotificationRepository] --> [NotificationEntity]
+
+@enduml

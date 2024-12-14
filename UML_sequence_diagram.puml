@@ -1,0 +1,12 @@
+@startuml UML_sequence_diagram
+
+actor Producer
+actor Postman
+Producer -> KafkaBroker: Send JSON Message
+KafkaBroker -> WebFluxConsumer: Deliver Message
+Postman -> WebFluxREST_API: send GET, PATCH request
+WebFluxConsumer -> PostgreSQL_DB: insert into notifications
+WebFluxREST_API <- PostgreSQL_DB: Query Notifications
+WebFluxREST_API --> Postman: Return Response
+
+@enduml

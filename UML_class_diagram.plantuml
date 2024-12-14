@@ -1,0 +1,36 @@
+@startuml
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+enum CreatedBy << enumeration >>
+class KafkaConsumerService
+class KafkaWebApplication
+enum MessageType << enumeration >>
+class NotificationDto
+class NotificationEntity
+class NotificationMapper
+interface NotificationRepository << interface >>
+class NotificationRestControllerV1
+class NotificationService
+enum NotificationStatus << enumeration >>
+enum ObjectType << enumeration >>
+enum TriggerCode << enumeration >>
+
+KafkaConsumerService         "1" *-[#595959,plain]-> "notificationService\n1" NotificationService
+NotificationDto              "1" *-[#595959,plain]-> "createdBy\n1" CreatedBy
+NotificationDto              "1" *-[#595959,plain]-> "messageType\n1" MessageType
+NotificationDto              "1" *-[#595959,plain]-> "notificationStatus\n1" NotificationStatus
+NotificationDto              "1" *-[#595959,plain]-> "objectType\n1" ObjectType
+NotificationDto              "1" *-[#595959,plain]-> "triggerCode\n1" TriggerCode
+NotificationEntity           "1" *-[#595959,plain]-> "createdBy\n1" CreatedBy
+NotificationEntity           "1" *-[#595959,plain]-> "messageType\n1" MessageType
+NotificationEntity           "1" *-[#595959,plain]-> "notificationStatus\n1" NotificationStatus
+NotificationEntity           "1" *-[#595959,plain]-> "objectType\n1" ObjectType
+NotificationEntity           "1" *-[#595959,plain]-> "triggerCode\n1" TriggerCode
+NotificationMapper            -[#595959,dashed]->  NotificationDto              : "«create»"
+NotificationMapper            -[#595959,dashed]->  NotificationEntity           : "«create»"
+NotificationRestControllerV1 "1" *-[#595959,plain]-> "notificationService\n1" NotificationService
+NotificationService          "1" *-[#595959,plain]-> "mapper\n1" NotificationMapper
+NotificationService          "1" *-[#595959,plain]-> "repository\n1" NotificationRepository
+@enduml

@@ -1,7 +1,9 @@
 package com.aleksandr_kobelskiy.kafkaweb.service;
 
+import com.aleksandr_kobelskiy.kafkaweb.dto.NotificationDto;
 import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationEntity;
 import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationStatus;
+import com.aleksandr_kobelskiy.kafkaweb.mapper.NotificationMapper;
 import com.aleksandr_kobelskiy.kafkaweb.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,15 +24,20 @@ import static org.apache.kafka.streams.kstream.EmitStrategy.log;
 public class NotificationService {
 
     private final NotificationRepository repository;
+    private final NotificationMapper mapper;
 
     public void processMessage(String message) {
-        NotificationEntity notificationEntity = parseMessage(message);
+        NotificationDto notificationDto = parseMessage(message);
 
-        // Проверяем, заполнено ли поле expirationDate
-        if (notificationEntity.getExpirationDate() == null) {
-            // Устанавливаем значение по умолчанию, например, 7 дней с текущего времени
-            notificationEntity.setExpirationDate(LocalDateTime.now().plusDays(7));
+        if (notificationDto == null) {
+            throw new IllegalArgumentException("Parsed NotificationDto is null");
         }
+
+        if (notificationDto.getExpirationDate() == null) {
+            notificationDto.setExpirationDate(LocalDateTime.now().plusDays(7));
+        }
+
+        NotificationEntity notificationEntity = mapper.toEntity(notificationDto);
 
         repository.save(notificationEntity)
                 .doOnSuccess(entity -> log.info("Notification saved successfully: {}", entity))
@@ -38,14 +45,16 @@ public class NotificationService {
                 .subscribe();
     }
 
-    public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
+    public Flux<NotificationDto> getAllNotifications(Pageable pageable) {
         Sort sort = pageable.getSortOr(Sort.unsorted());
-        return repository.findAll(sort); // Убедитесь, что репозиторий принимает Sort
+        return repository.findAll(sort)
+                .map(mapper::toDto);// Убедитесь, что репозиторий принимает Sort
     }
 
-    public Mono<NotificationEntity> getNotificationById(Long id) {
+    public Mono<NotificationDto> getNotificationById(Long id) {
         return repository.findById(id)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found")));
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found")))
+                .map(mapper::toDto);
     }
 
     public Mono<Void> updateNotificationStatus(Long id, String status) {
@@ -65,10 +74,15 @@ public class NotificationService {
         }
     }
 
-    private NotificationEntity parseMessage(String message) {
+    private NotificationDto parseMessage(String message) {
         ObjectMapper objectMapper = new ObjectMapper();
+        // Добавляем поддержку Java 8 дат и времени
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         try {
-            return objectMapper.readValue(message, NotificationEntity.class);
+            NotificationEntity entity = objectMapper.readValue(message, NotificationEntity.class);
+            return mapper.toDto(entity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse message: " + message, e);
         }

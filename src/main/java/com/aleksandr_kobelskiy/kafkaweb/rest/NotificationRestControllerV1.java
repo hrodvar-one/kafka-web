@@ -1,6 +1,6 @@
 package com.aleksandr_kobelskiy.kafkaweb.rest;
 
-import com.aleksandr_kobelskiy.kafkaweb.entity.NotificationEntity;
+import com.aleksandr_kobelskiy.kafkaweb.dto.NotificationDto;
 import com.aleksandr_kobelskiy.kafkaweb.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +17,12 @@ public class NotificationRestControllerV1 {
     private final NotificationService notificationService;
 
     @GetMapping
-    public Flux<NotificationEntity> getAllNotifications(Pageable pageable) {
+    public Flux<NotificationDto> getAllNotifications(Pageable pageable) {
         return notificationService.getAllNotifications(pageable);
     }
 
     @GetMapping("/{id}")
-    public Mono<NotificationEntity> getNotificationById(@PathVariable Long id) {
+    public Mono<NotificationDto> getNotificationById(@PathVariable Long id) {
         return notificationService.getNotificationById(id);
     }
 

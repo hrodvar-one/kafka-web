@@ -95,7 +95,7 @@
   ```
 
   ```
-  echo '{"message": "User registered successfully", "messageType": "INTERNAL", "error": null, "userUid": "123e4567-e89b-12d3-a456-426614174000", "notificationStatus": "NEW", "triggerCode": "USER_REGISTRATION_1", "objectType": "USER", "objectId": "123e4567-e89b-12d3-a456-426614174003", "subject": "User Registration", "createdBy": "SYSTEM", "hasConfirmOtp": true}' | kafka-console-producer --bootstrap-server localhost:9092 --topic notifications
+  echo '{"message": "User registered successfully", "messageType": "INTERNAL", "error": null, "userUid": "123e4567-e89b-12d3-a456-426614174000", "notificationStatus": "NEW", "triggerCode": "USER_REGISTRATION_1", "objectType": "USER", "objectId": "123e4567-e89b-12d3-a456-426614174004", "subject": "User Registration", "createdBy": "SYSTEM", "hasConfirmOtp": true}' | kafka-console-producer --bootstrap-server localhost:9092 --topic notifications
 
   ```
 
@@ -219,7 +219,7 @@
 
 ### UML диаграммы
 
-![UML_class_diagram.svg](/img/UML_class_diagram.svg)
-![UML_er_diagram.png](/img/ER_diagram.png)
-![UML_sequence_diagram.png](/img/UML_sequence_diagram.png)
+![UML_class_diagram.svg](/img/UML_class_diagram.svg)<br>
+![UML_er_diagram.png](/img/ER_diagram.png)<br>
+![UML_sequence_diagram.png](/img/UML_sequence_diagram.png)<br>
 ![UML_component_diagram.png](/img/UML_component_diagram.png)<br>
